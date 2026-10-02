@@ -1,12 +1,19 @@
 # gk-tests — agent guide
 
-The test platform: cross-cutting suites, and the gate definitions that decide what
-"green" means. **Public.**
+The test platform: **cross-repo test suites**, and nothing else. Gate definitions,
+shared harness logic and workspace policy are gk-workflow's single source of truth.
+**Public.**
 
 The binding rules for every Keepverse repository are in the workspace root:
 `../AGENTS.md` (loaded automatically for any agent working inside this folder).
-Docs live in `../docs/`. This file is emitted by kvsplit; change its template in
-`tools/kvsplit/rules/templates/`, not here.
+Docs live in `../docs/`.
+
+**This file is hand-maintained, not generated.** `gk-tests` lists `.gitignore`,
+`LICENSE`, `README.md` and `AGENTS.md` in its `preserve` set in
+`../tools/kvsplit/rules/layout.v1.json`, and there is no `templates/gk-tests/` — so an
+earlier version's claim that it was "emitted by kvsplit; change its template in
+tools/kvsplit/rules/templates/, not here" pointed at a template that does not exist.
+Edit it here.
 
 ## Rules specific to this repo
 
@@ -15,7 +22,7 @@ Docs live in `../docs/`. This file is emitted by kvsplit; change its template in
   its subject, and the gate records the SHA it ran against.
 - **Engine tests stay with their engine.** `gk-core` owns its own tests,
   `gk-fusion` its own, `gk-forge` its own. This repo is for suites that cross a
-  repository boundary, plus the gate definitions.
+  repository boundary — **not** for gate definitions, which are gk-workflow's.
 - **Verification is path-owned and scoped.** A change selects the smallest correct
   set of checks; the unfiltered suite is release-owned. Do not run everything "to
   be safe" — that burns minutes and is a choice of the wrong tool.
@@ -27,10 +34,22 @@ Docs live in `../docs/`. This file is emitted by kvsplit; change its template in
 - **A constraint is a claim until it is tested.** "This moves the goldens" and
   "this needs sign-off" both cost the owner a decision when assumed.
 
-## Status
+## Why this repository is empty, and why that is correct
 
-Empty, and **one design decision is still open.** The ownership rules currently
-route all `tests/**` to `gk-core` and each engine's tests to that engine. Before
-anything is staged here, settle whether this repo holds test *code* or only gate
-definitions and cross-cutting suites — the second is recommended, because it
-matches the existing path-owned model. Do not start work here until then.
+The `seal.reason` for `gk-tests` in `../tools/kvsplit/rules/layout.v1.json` settles
+what belongs here:
+
+> gk-tests holds cross-repo test suites and nothing else. Shared gate definitions,
+> shared harness logic and workspace policy are gk-workflow's single source of truth,
+> and a second copy of one inside a sub-repository is a competing copy. Nothing in
+> the legacy monorepo is a cross-repo suite, because before the split there were no
+> repositories to span, so the split places nothing here — and this seal is what
+> makes that a stated rule rather than an accident of no pattern matching.
+
+So the repository holds four files and no suites, and that is the specified end
+state rather than a decision awaiting an owner. An earlier version of this file said
+the opposite twice: it claimed the repository held "the gate definitions that decide
+what green means", and its Status section described the ownership question as still
+open. Both were false against the seal. The one documented exception is a CI file a
+platform requires inside a sub-repository, which stays a thin entrypoint to
+workflow-owned policy.

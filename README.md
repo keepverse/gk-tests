@@ -1,7 +1,8 @@
 # gk-tests
 
-The test platform: the suites that prove a change, and the gate definitions that
-decide what "green" means.
+The test platform: **the suites that cross a repository boundary**. Gate definitions,
+shared harness logic and workspace policy are gk-workflow's single source of truth —
+a second copy inside a sub-repository is a competing copy, so none lives here.
 
 - **Working rules:** [AGENTS.md](AGENTS.md)
 - **Verification boundary:** `gk-workflow/docs/contributing/test-verification-boundary-ideal.md`
@@ -10,9 +11,13 @@ decide what "green" means.
 
 | Path | What it is |
 |---|---|
-| `suites/` | Cross-cutting suites (E2E, scenario, acceptance). |
-| `gate/` | Gate definitions: what runs on a change, on a merge, on a release. |
-| `harness/` | Shared fixtures, process hosts, simulators. |
+| `suites/` | Cross-repo suites (E2E, scenario, acceptance). |
+| `harness/` | Fixtures or process hosts that a cross-repo suite needs. |
+
+What does **not** belong here: `gate/`. Gate definitions, shared harness logic and
+workspace policy are gk-workflow's — see the `seal.reason` for `gk-tests` in
+`tools/kvsplit/rules/layout.v1.json`, which is the authority for that split and is
+quoted in full in [AGENTS.md](AGENTS.md).
 
 Engine tests stay with their engine: `tests/FusionRpg.Core.*` belongs to
 `gk-core`, injector and launcher tests to `gk-fusion`, generator tests to
@@ -30,13 +35,10 @@ network lookup and not a stale copy.
 
 ## Status
 
-Empty, and **the one design decision still open.** The ownership rules currently
-route all `tests/**` to `gk-core` and the engine test projects to their engines.
-Before anything is staged here, decide:
-
-- keep test code with its subject and use this repo for gate definitions and
-  cross-cutting suites only (**recommended** — matches the existing model), or
-- move all test code here, which requires the lock-file mechanism above to exist
-  first.
-
-Do not start work here until that is settled.
+Empty, and **that is the specified state, not a pending decision.** The seal reason
+records that nothing in the legacy monorepo was a cross-repo suite — before the split
+there were no repositories to span — so the split placed nothing here deliberately,
+and the seal exists precisely to make that a stated rule rather than an accident of
+pattern matching. An earlier version of this file instead described the ownership
+question as open; it was settled by the seal before this repository ever held a
+suite.
